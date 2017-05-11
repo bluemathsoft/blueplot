@@ -1,0 +1,22 @@
+{
+  "name": "blueplot",
+  "version": "0.0.1",
+  "description": "Data plotting in 2D and 3D",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --watch --config webpack.config.js"
+  },
+  "keywords": [
+    "plotting"
+  ],
+  "author": "Jayesh Salvi",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.1.3",
+    "source-map-loader": "^0.2.1",
+    "typedoc": "^0.6.0",
+    "typescript": "^2.3.2",
+    "webpack": "^2.5.1"
+  }
+}
