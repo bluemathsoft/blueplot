@@ -5,7 +5,7 @@ import Transform from './transform'
 
 type OneDArray = Array<number>;
 type TwoDArray = Array<Array<number>>;
-type PlotType = 'scatter' | 'line' | 'bar';
+type PlotType = 'scatter' | 'line' | 'bar' | 'area';
 
 interface PlotOptions {
   type? : PlotType;
@@ -53,15 +53,38 @@ export default class Plot {
       // The x-coordinates are deduced from number of data points
       let type = options.type || 'line';
 
+      let darr = <Array<number>>data;
+      let xform = this._defineDataTransformFor1DData(darr);
+
       if(type === 'line') {
         let polyline = document.createElementNS(NS_SVG, 'polyline');
-        let darr = <Array<number>>data;
-        let xform = this._defineDataTransformFor1DData(darr);
         let coordStrings = darr.map(
           (y,i) => xform.transformPoint([i,y]).join(','));
         polyline.setAttribute('points', coordStrings.join(' '));
         polyline.setAttribute('style', 'stroke:#000;fill:none' );
         this.dom.appendChild(polyline);
+      } else if(type === 'scatter') {
+        darr.forEach((y,i) => {
+          let [cx,cy] = xform.transformPoint([i,y]);
+          let dot = document.createElementNS(NS_SVG, 'circle');
+          dot.setAttribute('cx', cx+'px');
+          dot.setAttribute('cy', cy+'px');
+          dot.setAttribute('r', '2px');
+          this.dom.appendChild(dot);
+        });
+      } else if(type === 'bar') {
+        let barWidth = 8;
+        darr.forEach((y,i) => {
+          let [xt,yt] = xform.transformPoint([i,y]);
+          console.log(xt,yt);
+          let bar = document.createElementNS(NS_SVG, 'rect');
+          bar.setAttribute('x', (xt-barWidth/2)+'px');
+          bar.setAttribute('y', yt+'px');
+          bar.setAttribute('width', barWidth+'px');
+          bar.setAttribute('height', yt+'px');
+          this.dom.appendChild(bar);
+        });
+
       }
 
     } else {
