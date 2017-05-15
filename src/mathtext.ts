@@ -19,7 +19,14 @@
  along with blueplot. If not, see <http://www.gnu.org/licenses/>.
 
 */
-import Plot from './plot'
-import MathText from './mathtext'
 
-export {Plot, MathText}
+export default class MathText {
+
+  dom : Element;
+
+  constructor(textContent:string) {
+    this.dom = document.createElement('p');
+    this.dom.textContent = textContent;
+  }
+
+}
