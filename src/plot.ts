@@ -42,6 +42,10 @@ export default class Plot {
   width : number;
   height : number;
 
+  private transform : Transform;
+  private ymin : number;
+  private ymax : number;
+
   constructor(width=400,height=300) {
     this.width = width;
     this.height = height;
@@ -56,15 +60,22 @@ export default class Plot {
     let xmin = 0;
     let xmax = data.length;
 
-    let xscale = 0.8 * this.width / (xmax-xmin);
-    let yscale = 0.8 * this.height / (ymax-ymin);
+    this.ymin = ymin;
+    this.ymax = ymax;
+
+    let xspan = xmax-xmin;
+    let yspan = ymax-ymin;
+
+    let xscale = 0.8 * this.width / xspan;
+    let yscale = 0.8 * this.height / yspan;
+
 
     // SVG Y-axis increases down, a math user will expect the reverse
-    let transform = new Transform();
-    transform.setTranslation(0.1*this.width, 0.9*this.height);
-    transform.setScale(xscale, -yscale);
-    return transform;
+    this.transform = new Transform();
+    this.transform.setTranslation(0.1*this.width, 0.9*this.height);
+    this.transform.setScale(xscale, -yscale);
   }
+
 
   add(data:OneDArray|TwoDArray, options?:PlotOptions) {
     if(!options) {
@@ -77,18 +88,18 @@ export default class Plot {
       let type = options.type || 'line';
 
       let darr = <Array<number>>data;
-      let xform = this._defineDataTransformFor1DData(darr);
+      this._defineDataTransformFor1DData(darr);
 
       if(type === 'line') {
         let polyline = document.createElementNS(NS_SVG, 'polyline');
         let coordStrings = darr.map(
-          (y,i) => xform.transformPoint([i,y]).join(','));
+          (y,i) => this.transform.transformPoint([i,y]).join(','));
         polyline.setAttribute('points', coordStrings.join(' '));
         polyline.setAttribute('style', 'stroke:#000;fill:none' );
         this.dom.appendChild(polyline);
       } else if(type === 'scatter') {
         darr.forEach((y,i) => {
-          let [cx,cy] = xform.transformPoint([i,y]);
+          let [cx,cy] = this.transform.transformPoint([i,y]);
           let dot = document.createElementNS(NS_SVG, 'circle');
           dot.setAttribute('cx', cx+'px');
           dot.setAttribute('cy', cy+'px');
@@ -98,7 +109,7 @@ export default class Plot {
       } else if(type === 'bar') {
         let barWidth = 8;
         darr.forEach((y,i) => {
-          let [xt,yt] = xform.transformPoint([i,y]);
+          let [xt,yt] = this.transform.transformPoint([i,y]);
           let bar = document.createElementNS(NS_SVG, 'rect');
           bar.setAttribute('x', (xt-barWidth/2)+'px');
           bar.setAttribute('y', yt+'px');
@@ -108,6 +119,42 @@ export default class Plot {
         });
 
       }
+
+      // Add ymax line
+      let ymaxLine = document.createElementNS(NS_SVG, 'line');
+      let tymax = this.transform.transformPoint([0,this.ymax])[1];
+      ymaxLine.setAttribute('id','ymax');
+      ymaxLine.setAttribute('x1','0');
+      ymaxLine.setAttribute('y1',tymax+'px');
+      ymaxLine.setAttribute('x2',this.width+'px');
+      ymaxLine.setAttribute('y2',tymax+'px');
+      ymaxLine.setAttribute('style','stroke:#888;fill:none');
+      this.dom.appendChild(ymaxLine);
+
+      // Add ymin line
+      let yminLine = document.createElementNS(NS_SVG, 'line');
+      let tymin = this.transform.transformPoint([0,this.ymin])[1];
+      yminLine.setAttribute('id','ymin');
+      yminLine.setAttribute('x1','0');
+      yminLine.setAttribute('y1',tymin+'px');
+      yminLine.setAttribute('x2',this.width+'px');
+      yminLine.setAttribute('y2',tymin+'px');
+      yminLine.setAttribute('style','stroke:#888;fill:none');
+      this.dom.appendChild(yminLine);
+
+      // Add ymax label
+      let ymaxLabel = document.createElementNS(NS_SVG, 'text');
+      ymaxLabel.textContent = this.ymax+'';
+      ymaxLabel.setAttribute('x', (this.width-20)+'px');
+      ymaxLabel.setAttribute('y', (tymax-5)+'px');
+      this.dom.appendChild(ymaxLabel);
+
+      // Add ymin label
+      let yminLabel = document.createElementNS(NS_SVG, 'text');
+      yminLabel.textContent = this.ymin+'';
+      yminLabel.setAttribute('x', (this.width-20)+'px');
+      yminLabel.setAttribute('y', (tymin-5)+'px');
+      this.dom.appendChild(yminLabel);
 
     } else {
       let firstElem:Array<number> = <Array<number>> data[0];
