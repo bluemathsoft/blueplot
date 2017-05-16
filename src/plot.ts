@@ -110,11 +110,19 @@ export default class Plot {
         let barWidth = 8;
         darr.forEach((y,i) => {
           let [xt,yt] = this.transform.transformPoint([i,y]);
+          let [,yb] = this.transform.transformPoint([i,0]);
+          let yval = yb-yt;
+          let ypos;
+          if(yval < 0) {
+            ypos = yb;
+          } else {
+            ypos = yt;
+          }
           let bar = document.createElementNS(NS_SVG, 'rect');
           bar.setAttribute('x', (xt-barWidth/2)+'px');
-          bar.setAttribute('y', yt+'px');
+          bar.setAttribute('y', ypos+'px');
           bar.setAttribute('width', barWidth+'px');
-          bar.setAttribute('height', yt+'px');
+          bar.setAttribute('height', Math.abs(yval)+'px');
           this.dom.appendChild(bar);
         });
 
