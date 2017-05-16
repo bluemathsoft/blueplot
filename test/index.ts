@@ -4,7 +4,7 @@ import {Plot, MathText} from '../src'
 window.onload = () => {
 
   let plot = new Plot();
-  plot.add([4,5,1,0,-5,20,43],{type:'bar'});
+  plot.add([4,5,1,0,-80,20,43],{type:'line'});
 
   let text = new MathText('`x = (-b +- sqrt(b^2-4ac))/(2a)`')
 

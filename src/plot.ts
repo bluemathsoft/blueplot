@@ -63,17 +63,33 @@ export default class Plot {
     this.ymin = ymin;
     this.ymax = ymax;
 
+    let ymid = (ymin+ymax)/2;
+
     let xspan = xmax-xmin;
-    let yspan = ymax-ymin;
 
     let xscale = 0.8 * this.width / xspan;
-    let yscale = 0.8 * this.height / yspan;
 
+    /*
+    * 0.1 * H <=> m * ymax + c
+    * 0.5 * H <=> m * ymid + c
+    * 0.9 * H <=> m * ymin + c
+    *
+    * The Y-transform eqn is: ty = m * y + c
+    *
+    * Solving, we get 
+    *   m = 0.4*H/(ymin-ymid)
+    *   c = 0.9*H - m*ymin
+    * In Transform form, m is scale and c is translation of y
+    */
+
+    let m = 0.4*this.height/(ymin-ymid);
+    let c = 0.9*this.height - m*ymin;
 
     // SVG Y-axis increases down, a math user will expect the reverse
     this.transform = new Transform();
-    this.transform.setTranslation(0.1*this.width, 0.9*this.height);
-    this.transform.setScale(xscale, -yscale);
+    this.transform.setTranslation(0.1*this.width, c);
+    this.transform.setScale(xscale, m);
+
   }
 
 
@@ -136,7 +152,7 @@ export default class Plot {
       ymaxLine.setAttribute('y1',tymax+'px');
       ymaxLine.setAttribute('x2',this.width+'px');
       ymaxLine.setAttribute('y2',tymax+'px');
-      ymaxLine.setAttribute('style','stroke:#888;fill:none');
+      ymaxLine.setAttribute('style','stroke:#888;fill:none;stroke-dasharray:4,5');
       this.dom.appendChild(ymaxLine);
 
       // Add ymin line
@@ -147,7 +163,7 @@ export default class Plot {
       yminLine.setAttribute('y1',tymin+'px');
       yminLine.setAttribute('x2',this.width+'px');
       yminLine.setAttribute('y2',tymin+'px');
-      yminLine.setAttribute('style','stroke:#888;fill:none');
+      yminLine.setAttribute('style','stroke:#888;fill:none;stroke-dasharray:4,5');
       this.dom.appendChild(yminLine);
 
       // Add ymax label
