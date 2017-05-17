@@ -24,6 +24,8 @@
 
 const NS_SVG = 'http://www.w3.org/2000/svg';
 
+import DataGroup from './datagroup'
+
 import Transform from './transform'
 
 type OneDArray = Array<number>;
@@ -45,6 +47,7 @@ export default class Plot {
   private transform : Transform;
   private ymin : number;
   private ymax : number;
+  private dgarr : Array<DataGroup>;
 
   constructor(width=400,height=300) {
     this.width = width;
@@ -52,8 +55,26 @@ export default class Plot {
     this.dom = document.createElementNS(NS_SVG, 'svg');
     this.dom.setAttribute('width', this.width+'px');
     this.dom.setAttribute('height', this.height+'px');
+    this.dgarr = [];
   }
 
+  add(dg : DataGroup) {
+    this.dgarr.push(dg);
+  }
+
+  render() {
+    // Remove all content of the plot
+    while(this.dom.children.length > 0) {
+      this.dom.children[0].remove();
+    }
+    for(let dg of this.dgarr) {
+      for(let dom of dg.plotDom) {
+        this.dom.appendChild(dom);
+      }
+    }
+  }
+
+  /*
   private _defineDataTransformFor1DData(data:OneDArray) {
     let ymin = Math.min(...data);
     let ymax = Math.max(...data);
@@ -80,7 +101,7 @@ export default class Plot {
     *   m = 0.4*H/(ymin-ymid)
     *   c = 0.9*H - m*ymin
     * In Transform form, m is scale and c is translation of y
-    */
+    * /
 
     let m = 0.4*this.height/(ymin-ymid);
     let c = 0.9*this.height - m*ymin;
@@ -191,4 +212,5 @@ export default class Plot {
       }
     } 
   }
+  */
 }
