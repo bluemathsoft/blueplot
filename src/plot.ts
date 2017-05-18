@@ -68,7 +68,7 @@ export default class Plot {
       this.dom.children[0].remove();
     }
     for(let dg of this.dgarr) {
-      for(let dom of dg.plotDom) {
+      for(let dom of dg.domArr) {
         this.dom.appendChild(dom);
       }
     }
