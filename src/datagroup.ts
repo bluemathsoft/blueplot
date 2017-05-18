@@ -272,4 +272,12 @@ export class DataGroup2D extends DataGroup {
     this._xSeriesGroup.push(xSeries);
     this._ySeriesGroup.push(ySeries);
   }
+
+  private _computeTransform() {
+
+  }
+
+  private _update() {
+    this._computeTransform();
+  }
 }
