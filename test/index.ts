@@ -8,7 +8,7 @@ window.onload = () => {
   document.body.appendChild(plot.dom);
 
   let dg = new DataGroup(plot.width, plot.height);
-  dg.add([4,5,1,0,-80,20,43], 'line');
+  dg.add([4,5,1,0,-80,20,43], 'bar');
   dg.add([14,5,21,10,160,-20,-23], 'line');
 
   plot.add(dg);

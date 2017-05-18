@@ -71,14 +71,16 @@ export default class DataGroup {
 
   _computeTransform() {
     let data:Array<any> = [];
+
+    let xmin = 0;
+    let xmax = 0;
     for(let d of this._dataArray) {
       data = data.concat(d);
+      xmax = Math.max(xmax, d.length);
     }
 
     let ymin = Math.min(...data);
     let ymax = Math.max(...data);
-    let xmin = 0;
-    let xmax = data.length;
 
     this.ymin = ymin;
     this.ymax = ymax;
