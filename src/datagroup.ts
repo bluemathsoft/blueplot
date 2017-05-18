@@ -121,6 +121,42 @@ export default class DataGroup {
     return polyline;
   }
 
+  private _genScatterDom(data:OneDArray) : Array<Element> {
+    let domArr:Array<Element> = [];
+    data.forEach((y,i) => {
+      let [cx,cy] = this._transform.transformPoint([i,y]);
+      let dot = document.createElementNS(NS_SVG, 'circle');
+      dot.setAttribute('cx', cx+'px');
+      dot.setAttribute('cy', cy+'px');
+      dot.setAttribute('r', '2px');
+      domArr.push(dot);
+    });
+    return domArr;
+  }
+
+  private _genBarDom(data:OneDArray) : Array<Element> {
+    let domArr:Array<Element> = [];
+    let barWidth = 8;
+    data.forEach((y,i) => {
+      let [xt,yt] = this._transform.transformPoint([i,y]);
+      let [,yb] = this._transform.transformPoint([i,0]);
+      let yval = yb-yt;
+      let ypos;
+      if(yval < 0) {
+        ypos = yb;
+      } else {
+        ypos = yt;
+      }
+      let bar = document.createElementNS(NS_SVG, 'rect');
+      bar.setAttribute('x', (xt-barWidth/2)+'px');
+      bar.setAttribute('y', ypos+'px');
+      bar.setAttribute('width', barWidth+'px');
+      bar.setAttribute('height', Math.abs(yval)+'px');
+      domArr.push(bar);
+    });
+    return domArr;
+  }
+
   private _updateAxisDom() {
     this._axisDom.splice(0);
     let transform = this._transform;
@@ -186,7 +222,7 @@ export default class DataGroup {
   private _update() {
     this._computeTransform();
 
-    this._plotDom.splice(0);
+    this._plotDom.splice(0); // Flush current plot doms
     for(let i=0; i<this._dataArray.length; i++) {
       let data = this._dataArray[i];
       let plotType = this._plotTypeArray[i];
@@ -196,8 +232,10 @@ export default class DataGroup {
           this._plotDom.push(this._genLineDom(data));
           break;
         case 'scatter':
+          this._plotDom = this._plotDom.concat(this._genScatterDom(data));
           break;
         case 'bar':
+          this._plotDom = this._plotDom.concat(this._genBarDom(data));
           break;
         case 'area':
           break;
