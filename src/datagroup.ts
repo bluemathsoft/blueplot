@@ -27,50 +27,53 @@ type OneDArray = Array<number>;
 type TwoDArray = Array<Array<number>>;
 type PlotType = 'scatter' | 'line' | 'bar' | 'area';
 
-export default class DataGroup {
+export class DataGroup {
+  protected _plotTypeArray : Array<PlotType>;
 
-  private _dataArray : Array<any>;
-  private _plotTypeArray : Array<PlotType>;
-
-  private _plotDom : Array<Element>;
-  private _axisDom : Array<Element>;
-  private _markerDom : Array<Element>;
-  private _transform : Transform;
-  private width : number;
-  private height : number;
-  private ymax : number;
-  private ymin : number;
+  protected _plotDom : Array<Element>;
+  protected _axisDom : Array<Element>;
+  protected _markerDom : Array<Element>;
+  protected _transform : Transform;
+  protected width : number;
+  protected height : number;
+  protected ymax : number;
+  protected ymin : number;
 
   constructor(width:number, height:number) {
     this.width = width;
     this.height = height;
-    this._dataArray = [];
     this._plotTypeArray = [];
     this._plotDom = [];
     this._axisDom = [];
     this._markerDom = [];
   }
 
-  add(data : OneDArray|TwoDArray, plotType:PlotType) {
-    if(this._dataArray.length > 1) {
-      let curDataSample = this._dataArray[0];
-      if(
-        // Current data in dataArray is TwoDArray, but newly added data is not
-        (Array.isArray(data[0]) && !Array.isArray(curDataSample[0])) ||
-        // Current data in dataArray is OneDArray, but newly added data is not
-        (!Array.isArray(data[0]) && Array.isArray(curDataSample[0]))
-      )
-      {
-        throw new Error('New data dimensions do not match with existing data');
-      }
-    }
+  get domArr() : Array<Element> {
+    let arr : Array<Element> = [];
+    arr = arr.concat(this._plotDom);
+    arr = arr.concat(this._axisDom);
+    arr = arr.concat(this._markerDom);
+    return arr;
+  }
+}
+
+export class DataGroup1D extends DataGroup {
+
+  private _dataArray : Array<OneDArray>;
+
+  constructor(width:number, height:number) {
+    super(width, height);
+    this._dataArray = [];
+  }
+
+  add(data : OneDArray, plotType:PlotType) {
     this._dataArray.push(data);
     this._plotTypeArray.push(plotType);
     this._update();
   }
 
   _computeTransform() {
-    let data:Array<any> = [];
+    let data:Array<number> = [];
 
     let xmin = 0;
     let xmax = 0;
@@ -242,18 +245,31 @@ export default class DataGroup {
         case 'area':
           break;
       }
-
     }
-
     this._updateAxisDom();
     this._updateMarkerDom();
   }
 
-  get domArr() : Array<Element> {
-    let arr : Array<Element> = [];
-    arr = arr.concat(this._plotDom);
-    arr = arr.concat(this._axisDom);
-    arr = arr.concat(this._markerDom);
-    return arr;
+}
+
+export class DataGroup2D extends DataGroup {
+
+  private _xSeriesGroup : Array<OneDArray>;
+  private _ySeriesGroup : Array<OneDArray>;
+
+  /**
+   * @param points expected [[x0,y0],[x1,y1],...]
+   * @param plotType 
+   */
+  addPoints(points:TwoDArray, plotType:PlotType) {
+    this._plotTypeArray.push(plotType);
+    let xSeries = [];
+    let ySeries = [];
+    for(let point of points) {
+      xSeries.push(point[0]);
+      ySeries.push(point[1]);
+    }
+    this._xSeriesGroup.push(xSeries);
+    this._ySeriesGroup.push(ySeries);
   }
 }
