@@ -1,6 +1,7 @@
 
 import {Plot, MathText} from '../src'
-import {DataGroup1D, DataGroup2D} from '../src/datagroup'
+import DataGroup1D from '../src/datagroup1d'
+import DataGroup2D from '../src/datagroup2d'
 
 window.onload = () => {
 
@@ -16,7 +17,7 @@ window.onload = () => {
     [2,22],[4,-22],[6,-30],[8,-10]
   ],{type:'bar',style:'stroke:#800;fill:none;stroke-width:1'});
 
-  // plot.add(dg1);
+  plot.add(dg1);
   plot.add(dg2);
   plot.render();
 

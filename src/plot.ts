@@ -24,18 +24,19 @@
 
 const NS_SVG = 'http://www.w3.org/2000/svg';
 
-import {DataGroup} from './datagroup'
+import DataGroup from './datagroup'
 
 import Transform from './transform'
 
 type OneDArray = Array<number>;
 type TwoDArray = Array<Array<number>>;
-type PlotType = 'scatter' | 'line' | 'bar' | 'area';
 
-interface PlotOptions {
-  type? : PlotType;
-  dimension? : number;
-}
+interface PlotType {
+  type :'scatter' | 'line' | 'bar' | 'area';
+  style? : string;
+  radius? : number; // For scatter plots
+  barwidth? : number; // For bar plots
+};
 
 
 export default class Plot {
@@ -74,4 +75,8 @@ export default class Plot {
     }
   }
 
+}
+
+export {
+  PlotType
 }
