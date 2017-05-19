@@ -29,6 +29,7 @@ interface PlotType {
   type :'scatter' | 'line' | 'bar' | 'area';
   style? : string;
   radius? : number; // For scatter plots
+  barwidth? : number; // For bar plots
 };
 
 const DEFAULT_STROKE_STYLE = 'stroke:#000;fill:none';
@@ -132,23 +133,25 @@ export class DataGroup1D extends DataGroup {
     return polyline;
   }
 
-  private _genScatterDom(data:OneDArray, style?:string) : Array<Element> {
+  private _genScatterDom(data:OneDArray, style?:string, radius?:number) : Array<Element> {
     let domArr:Array<Element> = [];
     data.forEach((y,i) => {
       let [cx,cy] = this._transform.transformPoint([i,y]);
       let dot = document.createElementNS(NS_SVG, 'circle');
       dot.setAttribute('cx', cx+'px');
       dot.setAttribute('cy', cy+'px');
-      dot.setAttribute('r', '2px');
+      dot.setAttribute('r', (radius||2)+'px');
       dot.setAttribute('style', style||DEFAULT_FILL_STYLE);
       domArr.push(dot);
     });
     return domArr;
   }
 
-  private _genBarDom(data:OneDArray, style?:string) : Array<Element> {
+  private _genBarDom(data:OneDArray, style?:string, barwidth?:number) :
+    Array<Element>
+  {
     let domArr:Array<Element> = [];
-    let barWidth = 8;
+    let barWidth = barwidth||8;
     data.forEach((y,i) => {
       let [xt,yt] = this._transform.transformPoint([i,y]);
       let [,yb] = this._transform.transformPoint([i,0]);
@@ -240,18 +243,20 @@ export class DataGroup1D extends DataGroup {
       let data = this._dataArray[i];
       let plotType = this._plotTypeArray[i];
 
-      switch(plotType.type) {
+      let {type,style,radius,barwidth} = plotType;
+
+      switch(type) {
         case 'line':
           this._plotDom.push(
-            this._genLineDom(data, plotType.style));
+            this._genLineDom(data, style));
           break;
         case 'scatter':
           this._plotDom = this._plotDom.concat(
-            this._genScatterDom(data, plotType.style));
+            this._genScatterDom(data, style, radius));
           break;
         case 'bar':
           this._plotDom = this._plotDom.concat(
-            this._genBarDom(data, plotType.style));
+            this._genBarDom(data, style, barwidth));
           break;
         case 'area':
           break;
@@ -368,6 +373,56 @@ export class DataGroup2D extends DataGroup {
     return polyline;
   }
 
+  private _genScatterDom(
+    xdata:OneDArray, ydata:OneDArray, style?:string, radius?:number) :
+    Array<Element>
+  {
+    let domArr:Array<Element> = [];
+    console.assert(xdata.length === ydata.length);
+    for(let i=0; i<xdata.length; i++) {
+      let x = xdata[i];
+      let y = ydata[i];
+      let [tx,ty] = this._transform.transformPoint([x,y]);
+      let dot = document.createElementNS(NS_SVG, 'circle');
+      dot.setAttribute('cx',tx+'px');
+      dot.setAttribute('cy',ty+'px');
+      dot.setAttribute('r',(radius||2)+'px');
+      dot.setAttribute('style',style||DEFAULT_FILL_STYLE);
+      domArr.push(dot);
+    }
+    return domArr;
+  }
+
+  private _genBarDom(
+    xdata:OneDArray, ydata:OneDArray, style?:string, barwidth?:number):
+    Array<Element>
+  {
+    let domArr:Array<Element> = [];
+    let barWidth = barwidth || 8;
+    console.assert(xdata.length === ydata.length);
+    for(let i=0; i<xdata.length; i++) {
+      let x = xdata[i];
+      let y = ydata[i];
+      let [tx,ty] = this._transform.transformPoint([x,y]);
+      let [,yb] = this._transform.transformPoint([x,0]);
+      let yval = yb-ty;
+      let ypos;
+      if(yval < 0) {
+        ypos = yb;
+      } else {
+        ypos = ty;
+      }
+      let bar = document.createElementNS(NS_SVG, 'rect');
+      bar.setAttribute('x', (tx-barWidth/2)+'px');
+      bar.setAttribute('y', ypos+'px');
+      bar.setAttribute('width', barWidth+'px');
+      bar.setAttribute('height',Math.abs(yval)+'px');
+      bar.setAttribute('style', style||DEFAULT_FILL_STYLE);
+      domArr.push(bar);
+    }
+    return domArr;
+  }
+
   private _update() {
     this._computeTransform();
 
@@ -378,9 +433,22 @@ export class DataGroup2D extends DataGroup {
       let yseries = this._ySeriesGroup[i];
       let plotType = this._plotTypeArray[i];
 
-      switch(plotType.type) {
+      let {style, radius, type, barwidth} = plotType;
+
+      switch(type) {
         case 'line':
-          this._plotDom.push(this._genLineDom(xseries, yseries, plotType.style));
+          this._plotDom.push(this._genLineDom(
+            xseries, yseries, style));
+          break;
+        case 'scatter':
+          this._plotDom = this._plotDom.concat(this._genScatterDom(
+            xseries, yseries, style, radius));
+          break;
+        case 'bar':
+          this._plotDom = this._plotDom.concat(this._genBarDom(
+            xseries, yseries, style, barwidth));
+          break;
+        case 'area':
           break;
       }
 
