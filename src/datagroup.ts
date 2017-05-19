@@ -114,7 +114,6 @@ export class DataGroup1D extends DataGroup {
     this._transform = new Transform();
     this._transform.setTranslation(0.1*this.width, c);
     this._transform.setScale(xscale, m);
-
   }
 
   private _genLineDom(data:OneDArray) : Element {
@@ -257,6 +256,15 @@ export class DataGroup2D extends DataGroup {
   private _xSeriesGroup : Array<OneDArray>;
   private _ySeriesGroup : Array<OneDArray>;
 
+  private xmin : number;
+  private xmax : number;
+
+  constructor(width:number, height:number) {
+    super(width, height);
+    this._xSeriesGroup = [];
+    this._ySeriesGroup = [];
+  }
+
   /**
    * @param points expected [[x0,y0],[x1,y1],...]
    * @param plotType 
@@ -271,13 +279,97 @@ export class DataGroup2D extends DataGroup {
     }
     this._xSeriesGroup.push(xSeries);
     this._ySeriesGroup.push(ySeries);
+
+    this._update();
   }
 
   private _computeTransform() {
 
+    /*
+    * For Y-dimension
+    * 0.1 * H <=> my * ymax + cy
+    * 0.5 * H <=> my * ymid + cy
+    * 0.9 * H <=> my * ymin + cy
+    *
+    * The Y-transform eqn is: ty = my * y + cy
+    *
+    * Solving, we get 
+    *   my = 0.4*H/(ymin-ymid)
+    *   cy = 0.9*H - my * ymin
+    * In Transform form, m is scale and c is translation of y
+    *
+    * For X-dimension
+    * 0.1 * W <=> mx * xmin + cx
+    * 0.5 * W <=> mx * xmid + cx
+    * 0.9 * W <=> mx * xmax + cx
+    *
+    * The X-transform eqn is: yx = mx * x + cx
+    *
+    * Solving, we get
+    *   mx = 0.4 * W / (xmax-xmid);
+    *   cx = 0.9 * W - mx * xmax;
+    */
+
+    this.xmin = Infinity;
+    this.xmax = -Infinity;
+    this.ymin = Infinity;
+    this.ymax = -Infinity;
+    for(let xseries of this._xSeriesGroup) {
+      this.xmin = Math.min(this.xmin, ...xseries);
+      this.xmax = Math.max(this.xmax, ...xseries);
+    }
+    for(let yseries of this._ySeriesGroup) {
+      this.ymin = Math.min(this.ymin, ...yseries);
+      this.ymax = Math.max(this.ymax, ...yseries);
+    }
+    let xspan = this.xmax-this.xmin;
+    let yspan = this.ymax-this.ymin;
+
+    let xmid = (this.xmin+this.xmax)/2;
+    let ymid = (this.ymin+this.ymax)/2;
+
+    let mx = 0.4*this.width/(this.xmax-xmid);
+    let cx = 0.9*this.width - mx*this.xmax;
+
+    let my = 0.4*this.height/(this.ymin-ymid);
+    let cy = 0.9*this.height - my*this.ymin;
+
+    this._transform = new Transform();
+    this._transform.setTranslation(cx,cy);
+    this._transform.setScale(mx,my);
+  }
+
+  private _genLineDom(xdata:OneDArray, ydata:OneDArray) : Element {
+    let polyline = document.createElementNS(NS_SVG, 'polyline');
+    console.assert(xdata.length === ydata.length);
+    let coordStrings = [];
+    for(let i=0; i<xdata.length; i++) {
+      let x = xdata[i];
+      let y = ydata[i];
+      let [tx,ty] = this._transform.transformPoint([x,y]);
+      coordStrings.push(`${tx},${ty}`);
+    }
+    polyline.setAttribute('points', coordStrings.join(' '));
+    polyline.setAttribute('style', 'stroke:#000;fill:none');
+    return polyline;
   }
 
   private _update() {
     this._computeTransform();
+
+    this._plotDom.splice(0); // Flush current plot doms
+    console.assert(this._xSeriesGroup.length === this._ySeriesGroup.length);
+    for(let i=0; i<this._xSeriesGroup.length; i++) {
+      let xseries = this._xSeriesGroup[i];
+      let yseries = this._ySeriesGroup[i];
+      let plotType = this._plotTypeArray[i];
+
+      switch(plotType) {
+        case 'line':
+          this._plotDom.push(this._genLineDom(xseries, yseries));
+          break;
+      }
+
+    }
   }
 }
