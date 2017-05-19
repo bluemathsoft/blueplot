@@ -25,7 +25,7 @@ type TwoDArray = Array<Array<number>>;
 
 import {PlotType} from './plot'
 import {
-  DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE
+  DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DataGroupOptions
 } from './datagroup'
 import DataGroup from './datagroup'
 import Transform from './transform'
@@ -38,8 +38,8 @@ export default class DataGroup2D extends DataGroup {
   private xmin : number;
   private xmax : number;
 
-  constructor(width:number, height:number) {
-    super(width, height);
+  constructor(width:number, height:number, options?:DataGroupOptions) {
+    super(width, height, options);
     this._xSeriesGroup = [];
     this._ySeriesGroup = [];
   }
@@ -213,7 +213,14 @@ export default class DataGroup2D extends DataGroup {
         case 'area':
           break;
       }
-
+      let axisDisplay = this.options.axisDisplay || 'visible';
+      if(axisDisplay === 'visible') {
+        this._updateAxisDom();
+      }
+      let markerDisplay = this.options.markerDisplay || 'visible';
+      if(markerDisplay === 'visible') {
+        this._updateMarkerDom();
+      }
     }
   }
 }

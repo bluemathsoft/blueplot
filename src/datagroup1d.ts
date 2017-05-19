@@ -23,7 +23,7 @@ type OneDArray = Array<number>;
 type TwoDArray = Array<Array<number>>;
 
 import {
-  DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE
+  DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DataGroupOptions
 } from './datagroup'
 import DataGroup from './datagroup'
 import {PlotType} from './plot'
@@ -34,8 +34,8 @@ export default class DataGroup1D extends DataGroup {
 
   private _dataArray : Array<OneDArray>;
 
-  constructor(width:number, height:number) {
-    super(width, height);
+  constructor(width:number, height:number, options?:DataGroupOptions) {
+    super(width, height, options);
     this._dataArray = [];
   }
 
@@ -138,68 +138,6 @@ export default class DataGroup1D extends DataGroup {
     return domArr;
   }
 
-  private _updateAxisDom() {
-    this._axisDom.splice(0);
-    let transform = this._transform;
-    let tymax = transform.transformPoint([0,this.ymax])[1];
-    let tymin = transform.transformPoint([0,this.ymin])[1];
-    // Add ymax label
-    let ymaxLabel = document.createElementNS(NS_SVG, 'text');
-    ymaxLabel.textContent = this.ymax+'';
-    let ymaxRightPadding = ymaxLabel.textContent.length * 10; // guestimate
-    ymaxLabel.setAttribute('x', (this.width-ymaxRightPadding)+'px');
-    ymaxLabel.setAttribute('y', (tymax-5)+'px');
-    this._axisDom.push(ymaxLabel);
-
-    // Add ymin label
-    let yminLabel = document.createElementNS(NS_SVG, 'text');
-    yminLabel.textContent = this.ymin+'';
-    let yminRightPadding = yminLabel.textContent.length * 10; // guestimate
-    yminLabel.setAttribute('x', (this.width-yminRightPadding)+'px');
-    yminLabel.setAttribute('y', (tymin-5)+'px');
-    this._axisDom.push(yminLabel);
-
-  }
-
-  private _updateMarkerDom() {
-    this._markerDom.splice(0);
-    let transform = this._transform;
-    // Add ymax line
-    let ymaxLine = document.createElementNS(NS_SVG, 'line');
-    let tymax = transform.transformPoint([0,this.ymax])[1];
-    ymaxLine.setAttribute('id','ymax');
-    ymaxLine.setAttribute('x1','0');
-    ymaxLine.setAttribute('y1',tymax+'px');
-    ymaxLine.setAttribute('x2',this.width+'px');
-    ymaxLine.setAttribute('y2',tymax+'px');
-    ymaxLine.setAttribute('style','stroke:#888;fill:none;stroke-dasharray:4,5');
-    this._markerDom.push(ymaxLine);
-
-    // Add ymin line
-    let yminLine = document.createElementNS(NS_SVG, 'line');
-    let tymin = transform.transformPoint([0,this.ymin])[1];
-    yminLine.setAttribute('id','ymin');
-    yminLine.setAttribute('x1','0');
-    yminLine.setAttribute('y1',tymin+'px');
-    yminLine.setAttribute('x2',this.width+'px');
-    yminLine.setAttribute('y2',tymin+'px');
-    yminLine.setAttribute('style','stroke:#888;fill:none;stroke-dasharray:4,5');
-    this._markerDom.push(yminLine);
-
-    if(this.ymin < 0 && this.ymax > 0) {
-      // Add zero marker
-      let zeroLine = document.createElementNS(NS_SVG, 'line');
-      let tzero = transform.transformPoint([0,0])[1];
-      zeroLine.setAttribute('id','zero');
-      zeroLine.setAttribute('x1','0');
-      zeroLine.setAttribute('y1',tzero+'px');
-      zeroLine.setAttribute('x2',this.width+'px');
-      zeroLine.setAttribute('y2',tzero+'px');
-      zeroLine.setAttribute('style','stroke:#ccc;fill:none;stroke-dasharray:4,5');
-      this._markerDom.push(zeroLine);
-    }
-  }
-
   private _update() {
     this._computeTransform();
 
@@ -227,8 +165,14 @@ export default class DataGroup1D extends DataGroup {
           break;
       }
     }
-    this._updateAxisDom();
-    this._updateMarkerDom();
+    let axisDisplay = this.options.axisDisplay || 'visible';
+    if(axisDisplay === 'visible') {
+      this._updateAxisDom();
+    }
+    let markerDisplay = this.options.markerDisplay || 'visible';
+    if(markerDisplay === 'visible') {
+      this._updateMarkerDom();
+    }
   }
 
 }
