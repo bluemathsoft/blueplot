@@ -25,7 +25,14 @@ import Transform from './transform'
 
 type OneDArray = Array<number>;
 type TwoDArray = Array<Array<number>>;
-type PlotType = 'scatter' | 'line' | 'bar' | 'area';
+interface PlotType {
+  type :'scatter' | 'line' | 'bar' | 'area';
+  style? : string;
+  radius? : number; // For scatter plots
+};
+
+const DEFAULT_STROKE_STYLE = 'stroke:#000;fill:none';
+const DEFAULT_FILL_STYLE = 'stroke:none;fill:#000';
 
 export class DataGroup {
   protected _plotTypeArray : Array<PlotType>;
@@ -116,16 +123,16 @@ export class DataGroup1D extends DataGroup {
     this._transform.setScale(xscale, m);
   }
 
-  private _genLineDom(data:OneDArray) : Element {
+  private _genLineDom(data:OneDArray, style?:string) : Element {
     let polyline = document.createElementNS(NS_SVG, 'polyline');
     let coordStrings = data.map(
       (y,i) => this._transform.transformPoint([i,y]).join(','));
     polyline.setAttribute('points', coordStrings.join(' '));
-    polyline.setAttribute('style', 'stroke:#000;fill:none' );
+    polyline.setAttribute('style', style||DEFAULT_STROKE_STYLE);
     return polyline;
   }
 
-  private _genScatterDom(data:OneDArray) : Array<Element> {
+  private _genScatterDom(data:OneDArray, style?:string) : Array<Element> {
     let domArr:Array<Element> = [];
     data.forEach((y,i) => {
       let [cx,cy] = this._transform.transformPoint([i,y]);
@@ -133,12 +140,13 @@ export class DataGroup1D extends DataGroup {
       dot.setAttribute('cx', cx+'px');
       dot.setAttribute('cy', cy+'px');
       dot.setAttribute('r', '2px');
+      dot.setAttribute('style', style||DEFAULT_FILL_STYLE);
       domArr.push(dot);
     });
     return domArr;
   }
 
-  private _genBarDom(data:OneDArray) : Array<Element> {
+  private _genBarDom(data:OneDArray, style?:string) : Array<Element> {
     let domArr:Array<Element> = [];
     let barWidth = 8;
     data.forEach((y,i) => {
@@ -156,6 +164,7 @@ export class DataGroup1D extends DataGroup {
       bar.setAttribute('y', ypos+'px');
       bar.setAttribute('width', barWidth+'px');
       bar.setAttribute('height', Math.abs(yval)+'px');
+      bar.setAttribute('style', style||DEFAULT_FILL_STYLE);
       domArr.push(bar);
     });
     return domArr;
@@ -231,15 +240,18 @@ export class DataGroup1D extends DataGroup {
       let data = this._dataArray[i];
       let plotType = this._plotTypeArray[i];
 
-      switch(plotType) {
+      switch(plotType.type) {
         case 'line':
-          this._plotDom.push(this._genLineDom(data));
+          this._plotDom.push(
+            this._genLineDom(data, plotType.style));
           break;
         case 'scatter':
-          this._plotDom = this._plotDom.concat(this._genScatterDom(data));
+          this._plotDom = this._plotDom.concat(
+            this._genScatterDom(data, plotType.style));
           break;
         case 'bar':
-          this._plotDom = this._plotDom.concat(this._genBarDom(data));
+          this._plotDom = this._plotDom.concat(
+            this._genBarDom(data, plotType.style));
           break;
         case 'area':
           break;
@@ -339,7 +351,9 @@ export class DataGroup2D extends DataGroup {
     this._transform.setScale(mx,my);
   }
 
-  private _genLineDom(xdata:OneDArray, ydata:OneDArray) : Element {
+  private _genLineDom(
+    xdata:OneDArray, ydata:OneDArray, style?:string) : Element
+  {
     let polyline = document.createElementNS(NS_SVG, 'polyline');
     console.assert(xdata.length === ydata.length);
     let coordStrings = [];
@@ -350,7 +364,7 @@ export class DataGroup2D extends DataGroup {
       coordStrings.push(`${tx},${ty}`);
     }
     polyline.setAttribute('points', coordStrings.join(' '));
-    polyline.setAttribute('style', 'stroke:#000;fill:none');
+    polyline.setAttribute('style', style||DEFAULT_STROKE_STYLE);
     return polyline;
   }
 
@@ -364,9 +378,9 @@ export class DataGroup2D extends DataGroup {
       let yseries = this._ySeriesGroup[i];
       let plotType = this._plotTypeArray[i];
 
-      switch(plotType) {
+      switch(plotType.type) {
         case 'line':
-          this._plotDom.push(this._genLineDom(xseries, yseries));
+          this._plotDom.push(this._genLineDom(xseries, yseries, plotType.style));
           break;
       }
 
