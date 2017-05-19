@@ -2,7 +2,7 @@
   "name": "blueplot",
   "version": "0.0.1",
   "description": "Data plotting in 2D and 3D",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "watch": "webpack --watch --config webpack.config.js",

@@ -19,9 +19,6 @@
 
 */
 
-type OneDArray = Array<number>;
-type TwoDArray = Array<Array<number>>;
-
 import {
   DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DataGroupOptions
 } from './datagroup'
@@ -32,14 +29,14 @@ import Transform from './transform'
 const NS_SVG = 'http://www.w3.org/2000/svg';
 export default class DataGroup1D extends DataGroup {
 
-  private _dataArray : Array<OneDArray>;
+  private _dataArray : Array<number[]>;
 
   constructor(width:number, height:number, options?:DataGroupOptions) {
     super(width, height, options);
     this._dataArray = [];
   }
 
-  add(data : OneDArray, plotType:PlotType) {
+  add(data : number[], plotType:PlotType) {
     this._dataArray.push(data);
     this._plotTypeArray.push(plotType);
     this._update();
@@ -89,7 +86,7 @@ export default class DataGroup1D extends DataGroup {
     this._transform.setScale(xscale, m);
   }
 
-  private _genLineDom(data:OneDArray, style?:string) : Element {
+  private _genLineDom(data:number[], style?:string) : Element {
     let polyline = document.createElementNS(NS_SVG, 'polyline');
     let coordStrings = data.map(
       (y,i) => this._transform.transformPoint([i,y]).join(','));
@@ -98,7 +95,7 @@ export default class DataGroup1D extends DataGroup {
     return polyline;
   }
 
-  private _genScatterDom(data:OneDArray, style?:string, radius?:number) : Array<Element> {
+  private _genScatterDom(data:number[], style?:string, radius?:number) : Array<Element> {
     let domArr:Array<Element> = [];
     data.forEach((y,i) => {
       let [cx,cy] = this._transform.transformPoint([i,y]);
@@ -112,7 +109,7 @@ export default class DataGroup1D extends DataGroup {
     return domArr;
   }
 
-  private _genBarDom(data:OneDArray, style?:string, barwidth?:number) :
+  private _genBarDom(data:number[], style?:string, barwidth?:number) :
     Array<Element>
   {
     let domArr:Array<Element> = [];

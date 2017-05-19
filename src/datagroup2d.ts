@@ -20,8 +20,6 @@
 */
 
 const NS_SVG = 'http://www.w3.org/2000/svg';
-type OneDArray = Array<number>;
-type TwoDArray = Array<Array<number>>;
 
 import {PlotType} from './plot'
 import {
@@ -32,8 +30,8 @@ import Transform from './transform'
 
 export default class DataGroup2D extends DataGroup {
 
-  private _xSeriesGroup : Array<OneDArray>;
-  private _ySeriesGroup : Array<OneDArray>;
+  private _xSeriesGroup : Array<number[]>;
+  private _ySeriesGroup : Array<number[]>;
 
   private xmin : number;
   private xmax : number;
@@ -48,7 +46,7 @@ export default class DataGroup2D extends DataGroup {
    * @param points expected [[x0,y0],[x1,y1],...]
    * @param plotType 
    */
-  addPoints(points:TwoDArray, plotType:PlotType) {
+  addPoints(points:number[][], plotType:PlotType) {
     this._plotTypeArray.push(plotType);
     let xSeries = [];
     let ySeries = [];
@@ -119,7 +117,7 @@ export default class DataGroup2D extends DataGroup {
   }
 
   private _genLineDom(
-    xdata:OneDArray, ydata:OneDArray, style?:string) : Element
+    xdata:number[], ydata:number[], style?:string) : Element
   {
     let polyline = document.createElementNS(NS_SVG, 'polyline');
     console.assert(xdata.length === ydata.length);
@@ -136,7 +134,7 @@ export default class DataGroup2D extends DataGroup {
   }
 
   private _genScatterDom(
-    xdata:OneDArray, ydata:OneDArray, style?:string, radius?:number) :
+    xdata:number[], ydata:number[], style?:string, radius?:number) :
     Array<Element>
   {
     let domArr:Array<Element> = [];
@@ -156,7 +154,7 @@ export default class DataGroup2D extends DataGroup {
   }
 
   private _genBarDom(
-    xdata:OneDArray, ydata:OneDArray, style?:string, barwidth?:number):
+    xdata:number[], ydata:number[], style?:string, barwidth?:number):
     Array<Element>
   {
     let domArr:Array<Element> = [];
