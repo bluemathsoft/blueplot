@@ -1,12 +1,14 @@
 {
   "name": "blueplot",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "Data plotting in 2D and 3D",
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.js",
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "watch": "webpack --watch --config webpack.config.js",
-    "docs": "typedoc --out ./docs ./src"
+    "docs": "typedoc --out ./docs ./src",
+    "prepublish": "(cd src; tsc -p .)"
   },
   "keywords": [
     "plotting"
