@@ -27,7 +27,12 @@ import {PlotType} from './plot'
 import Transform from './transform'
 
 const NS_SVG = 'http://www.w3.org/2000/svg';
-export default class DataGroup1D extends DataGroup {
+
+/**
+ * This DataGroup is for 1-dimensional data of length N
+ * For e.g. values of a function at regular intervals
+ */
+export default class DataGroupN extends DataGroup {
 
   private _dataArray : Array<number[]>;
 

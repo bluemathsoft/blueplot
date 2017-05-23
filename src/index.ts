@@ -21,8 +21,9 @@
 */
 import Plot from './plot'
 import MathText from './mathtext'
-import Datagroup from './datagroup'
-import Datagroup1D from './datagroup'
-import Datagroup2D from './datagroup'
+import DataGroup from './datagroup'
+import DataGroupN from './datagroupN'
+import DataGroup2N from './datagroup2N'
+import DataGroupMN from './datagroupMN'
 
-export {Plot, MathText, Datagroup, Datagroup1D, Datagroup2D}
+export {Plot, MathText, DataGroup, DataGroupN, DataGroup2N}

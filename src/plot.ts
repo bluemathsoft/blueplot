@@ -32,7 +32,7 @@ type OneDArray = Array<number>;
 type TwoDArray = Array<Array<number>>;
 
 interface PlotType {
-  type :'scatter' | 'line' | 'bar' | 'area';
+  type :'scatter' | 'line' | 'bar' | 'area' | 'grid';
   style? : string;
   radius? : number; // For scatter plots
   barwidth? : number; // For bar plots

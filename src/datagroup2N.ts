@@ -28,7 +28,11 @@ import {
 import DataGroup from './datagroup'
 import Transform from './transform'
 
-export default class DataGroup2D extends DataGroup {
+/**
+ * This DataGroup is for 2-dimensional data with N-data points in each
+ * dimension. For e.g. Points on plane
+ */
+export default class DataGroup2N extends DataGroup {
 
   private _xSeriesGroup : Array<number[]>;
   private _ySeriesGroup : Array<number[]>;
@@ -46,7 +50,7 @@ export default class DataGroup2D extends DataGroup {
    * @param points expected [[x0,y0],[x1,y1],...]
    * @param plotType 
    */
-  addPoints(points:number[][], plotType:PlotType) {
+  fromPoints(points:number[][], plotType:PlotType) {
     this._plotTypeArray.push(plotType);
     let xSeries = [];
     let ySeries = [];
@@ -57,6 +61,17 @@ export default class DataGroup2D extends DataGroup {
     this._xSeriesGroup.push(xSeries);
     this._ySeriesGroup.push(ySeries);
 
+    this._update();
+  }
+
+  /**
+   * @param xSeries expected [x0,x1,x2,...]
+   * @param ySeries expected [y0,y1,y2,...]
+   */
+  fromSeries(xSeries:number[], ySeries:number[], plotType:PlotType) {
+    this._plotTypeArray.push(plotType);
+    this._xSeriesGroup.push(xSeries.slice(0));
+    this._ySeriesGroup.push(ySeries.slice(0));
     this._update();
   }
 
