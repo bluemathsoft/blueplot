@@ -1,25 +1,25 @@
 
-interface RGBObject {
+interface RGBDef {
   r:number;
   g:number;
   b:number;
   a?:number;
 }
 
-interface HSVObject {
+interface HSVDef {
   h:number;
   s:number;
   v:number;
   a?:number;
 }
 
-function isRGB(arg: RGBObject|HSVObject|number[]|number) : arg is RGBObject {
-  return (<RGBObject>arg).r !== undefined;
+function isRGB(arg: RGBDef|HSVDef|number[]|number) : arg is RGBDef {
+  return (<RGBDef>arg).r !== undefined;
 }
-function isHSV(arg: RGBObject|HSVObject|number[]|number) : arg is HSVObject {
-  return (<HSVObject>arg).h !== undefined;
+function isHSV(arg: RGBDef|HSVDef|number[]|number) : arg is HSVDef {
+  return (<HSVDef>arg).h !== undefined;
 }
-function isRGBArray(arg: RGBObject|HSVObject|number[]|number) : arg is number[] {
+function isRGBArray(arg: RGBDef|HSVDef|number[]|number) : arg is number[] {
   return Array.isArray(<number[]>arg);
 }
 
@@ -38,7 +38,8 @@ export default class Kolor {
    * new Kolor({r,g,b,a}); // each of r,g,b,a should be in 0.0 to 1.0, otherwise undefined behavior
    * new Kolor({h,s,v,a}); // each of h,s,v,a should be in 0.0 to 1.0, otherwise undefined behavior
    */
-  constructor(arg1:RGBObject|HSVObject|number[]|number,
+  constructor(
+    arg1:RGBDef|HSVDef|number[]|number,
     arg2?:number,
     arg3?:number,
     arg4?:number)
@@ -72,7 +73,6 @@ export default class Kolor {
       } else {
         this.a = arg1[3];
       }
-
     } else {
       this.rgb = [ arg1, arg2||0.0, arg3||0.0 ];
       if(arg4 === undefined || arg4 === null) {
@@ -81,6 +81,11 @@ export default class Kolor {
         this.a = arg4;
       }
     }
+  }
+
+  clone() {
+    let [r,g,b] = this.RGB();
+    return new Kolor(r,g,b,this.a);
   }
 
   /**
