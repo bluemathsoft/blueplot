@@ -7,6 +7,12 @@ import Kolor from './kolor'
 
 const NS_SVG = 'http://www.w3.org/2000/svg';
 
+function isInteger(value:number) {
+  return typeof value === 'number' &&
+    isFinite(value) &&
+    Math.floor(value) === value;
+}
+
 export default class DataGroupMN extends DataGroup {
 
   private _data : number[][];
@@ -54,7 +60,7 @@ export default class DataGroupMN extends DataGroup {
         let text = document.createElementNS(NS_SVG, 'text');
         text.setAttribute('x',(j*cellW+cellW/2)+'px');
         text.setAttribute('y',(i*cellH+cellH/2)+'px');
-        if(Number.isInteger(v)) {
+        if(isInteger(v)) {
           text.textContent = Math.round(v)+'';
         } else {
           text.textContent = v.toFixed(2);
@@ -93,7 +99,6 @@ export default class DataGroupMN extends DataGroup {
 
     this._m = 1/vspan;
     this._c = 1-vmax/vspan;
-
   }
 
   private _update() {
