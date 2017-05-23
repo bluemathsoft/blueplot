@@ -1,9 +1,10 @@
 import DataGroup from './datagroup';
 interface PlotType {
-    type: 'scatter' | 'line' | 'bar' | 'area';
+    type: 'scatter' | 'line' | 'bar' | 'area' | 'grid';
     style?: string;
     radius?: number;
     barwidth?: number;
+    timetrail?: boolean;
 }
 export default class Plot {
     dom: Element;
@@ -15,6 +16,5 @@ export default class Plot {
     private dgarr;
     constructor(width?: number, height?: number);
     add(dg: DataGroup): void;
-    render(): void;
 }
 export { PlotType };

@@ -9,9 +9,8 @@ interface DataGroupOptions {
 export { DEFAULT_FILL_STYLE, DEFAULT_STROKE_STYLE, DataGroupOptions };
 export default class DataGroup {
     protected _plotTypeArray: Array<PlotType>;
-    protected _plotDom: Array<Element>;
-    protected _axisDom: Array<Element>;
-    protected _markerDom: Array<Element>;
+    dom: Element;
+    guid: string;
     protected _transform: Transform;
     protected width: number;
     protected height: number;
@@ -19,7 +18,6 @@ export default class DataGroup {
     protected ymin: number;
     protected options: DataGroupOptions;
     constructor(width: number, height: number, options?: DataGroupOptions);
-    readonly domArr: Array<Element>;
     protected _updateAxisDom(): void;
     protected _updateMarkerDom(): void;
 }

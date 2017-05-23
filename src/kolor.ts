@@ -13,6 +13,8 @@ interface HSVDef {
   a?:number;
 }
 
+export {RGBDef, HSVDef};
+
 function isRGB(arg: RGBDef|HSVDef|number[]|number) : arg is RGBDef {
   return (<RGBDef>arg).r !== undefined;
 }
