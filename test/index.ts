@@ -17,7 +17,7 @@ window.onload = () => {
   dg1.add([14,5,21,10,160,-20,-23], {type:'line', style:'fill:none;stroke:#444;stroke-width:1'});
 
   let dg2 = new DataGroup2N(plot.width, plot.height, {
-    markerDisplay:'hidden',
+    markerDisplay:'visible',
     axisDisplay:'visible'
   });
   dg2.fromPoints([
@@ -37,7 +37,6 @@ window.onload = () => {
   plot.add(dg1);
   plot.add(dg2);
   plot.add(dg3);
-  plot.render();
 
   let text = new MathText('`x = (-b +- sqrt(b^2-4ac))/(2a)`')
   document.body.appendChild(text.dom);

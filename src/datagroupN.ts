@@ -92,16 +92,20 @@ export default class DataGroupN extends DataGroup {
   }
 
   private _genLineDom(data:number[], style?:string) : Element {
+    let g = document.createElementNS(NS_SVG, 'g');
+    g.setAttribute('class','plot-content');
     let polyline = document.createElementNS(NS_SVG, 'polyline');
     let coordStrings = data.map(
       (y,i) => this._transform.transformPoint([i,y]).join(','));
     polyline.setAttribute('points', coordStrings.join(' '));
     polyline.setAttribute('style', style||DEFAULT_STROKE_STYLE);
-    return polyline;
+    g.appendChild(polyline);
+    return g;
   }
 
-  private _genScatterDom(data:number[], style?:string, radius?:number) : Array<Element> {
-    let domArr:Array<Element> = [];
+  private _genScatterDom(data:number[], style?:string, radius?:number) : Element {
+    let g = document.createElementNS(NS_SVG, 'g');
+    g.setAttribute('class','plot-content');
     data.forEach((y,i) => {
       let [cx,cy] = this._transform.transformPoint([i,y]);
       let dot = document.createElementNS(NS_SVG, 'circle');
@@ -109,15 +113,14 @@ export default class DataGroupN extends DataGroup {
       dot.setAttribute('cy', cy+'px');
       dot.setAttribute('r', (radius||2)+'px');
       dot.setAttribute('style', style||DEFAULT_FILL_STYLE);
-      domArr.push(dot);
+      g.appendChild(dot);
     });
-    return domArr;
+    return g;
   }
 
-  private _genBarDom(data:number[], style?:string, barwidth?:number) :
-    Array<Element>
-  {
-    let domArr:Array<Element> = [];
+  private _genBarDom(data:number[], style?:string, barwidth?:number) : Element {
+    let g = document.createElementNS(NS_SVG, 'g');
+    g.setAttribute('class','plot-content');
     let barWidth = barwidth||8;
     data.forEach((y,i) => {
       let [xt,yt] = this._transform.transformPoint([i,y]);
@@ -135,15 +138,19 @@ export default class DataGroupN extends DataGroup {
       bar.setAttribute('width', barWidth+'px');
       bar.setAttribute('height', Math.abs(yval)+'px');
       bar.setAttribute('style', style||DEFAULT_FILL_STYLE);
-      domArr.push(bar);
+      g.appendChild(bar);
     });
-    return domArr;
+    return g;
   }
 
   private _update() {
     this._computeTransform();
 
-    this._plotDom.splice(0); // Flush current plot doms
+    let plotElements = this.dom.querySelectorAll('.plot-content');
+    for(let i=0; i<plotElements.length; i++) {
+      plotElements[i].remove();
+    }
+
     for(let i=0; i<this._dataArray.length; i++) {
       let data = this._dataArray[i];
       let plotType = this._plotTypeArray[i];
@@ -152,16 +159,13 @@ export default class DataGroupN extends DataGroup {
 
       switch(type) {
         case 'line':
-          this._plotDom.push(
-            this._genLineDom(data, style));
+          this.dom.appendChild(this._genLineDom(data, style));
           break;
         case 'scatter':
-          this._plotDom = this._plotDom.concat(
-            this._genScatterDom(data, style, radius));
+          this.dom.appendChild(this._genScatterDom(data, style, radius));
           break;
         case 'bar':
-          this._plotDom = this._plotDom.concat(
-            this._genBarDom(data, style, barwidth));
+          this.dom.appendChild(this._genBarDom(data, style, barwidth));
           break;
         case 'area':
           break;

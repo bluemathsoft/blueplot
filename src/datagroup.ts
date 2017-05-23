@@ -42,12 +42,22 @@ export {
   DataGroupOptions
 }
 
+function genGUID() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
+}
+
 export default class DataGroup {
   protected _plotTypeArray : Array<PlotType>;
 
-  protected _plotDom : Array<Element>;
-  protected _axisDom : Array<Element>;
-  protected _markerDom : Array<Element>;
+  public dom : Element;
+  public guid : string;
+
   protected _transform : Transform;
   protected width : number;
   protected height : number;
@@ -56,84 +66,89 @@ export default class DataGroup {
   protected options : DataGroupOptions;
 
   constructor(width:number, height:number, options?:DataGroupOptions) {
+    this.guid = genGUID();
     this.width = width;
     this.height = height;
     this.options = options || {};
     this._plotTypeArray = [];
-    this._plotDom = [];
-    this._axisDom = [];
-    this._markerDom = [];
+    this.dom = document.createElementNS(NS_SVG, 'g');
+    this.dom.setAttribute('class','datagroup');
+    this.dom.setAttribute('id',this.guid+'-g');
   }
 
-  get domArr() : Array<Element> {
-    let arr : Array<Element> = [];
-    arr = arr.concat(this._plotDom);
-    arr = arr.concat(this._axisDom);
-    arr = arr.concat(this._markerDom);
-    return arr;
-  }
 
   protected _updateAxisDom() {
-    this._axisDom.splice(0);
+    let ymaxLabel = this.dom.querySelector('#ymax-label-'+this.guid);
+    if(ymaxLabel) { ymaxLabel.remove(); }
+    let yminLabel = this.dom.querySelector('#ymin-label-'+this.guid);
+    if(yminLabel) { yminLabel.remove(); }
+
     let transform = this._transform;
     let tymax = transform.transformPoint([0,this.ymax])[1];
     let tymin = transform.transformPoint([0,this.ymin])[1];
+
     // Add ymax label
-    let ymaxLabel = document.createElementNS(NS_SVG, 'text');
+    ymaxLabel = document.createElementNS(NS_SVG, 'text');
     ymaxLabel.textContent = this.ymax+'';
     let ymaxRightPadding = ymaxLabel.textContent.length * 10; // guestimate
     ymaxLabel.setAttribute('x', (this.width-ymaxRightPadding)+'px');
     ymaxLabel.setAttribute('y', (tymax-5)+'px');
-    this._axisDom.push(ymaxLabel);
+    ymaxLabel.setAttribute('id', 'ymax-label-'+this.guid);
+    this.dom.appendChild(ymaxLabel)
 
     // Add ymin label
-    let yminLabel = document.createElementNS(NS_SVG, 'text');
+    yminLabel = document.createElementNS(NS_SVG, 'text');
     yminLabel.textContent = this.ymin+'';
     let yminRightPadding = yminLabel.textContent.length * 10; // guestimate
     yminLabel.setAttribute('x', (this.width-yminRightPadding)+'px');
     yminLabel.setAttribute('y', (tymin-5)+'px');
-    this._axisDom.push(yminLabel);
-
+    yminLabel.setAttribute('id', 'ymin-label-'+this.guid);
+    this.dom.appendChild(yminLabel);
   }
 
   protected _updateMarkerDom() {
-    this._markerDom.splice(0);
+    let ymaxLine = this.dom.querySelector('#ymax-line-'+this.guid);
+    if(ymaxLine) { ymaxLine.remove(); }
+    let yminLine = this.dom.querySelector('#ymin-line-'+this.guid);
+    if(yminLine) { yminLine.remove(); }
+    let zeroLine = this.dom.querySelector('#zero-line-'+this.guid);
+    if(zeroLine) { zeroLine.remove(); }
+
     let transform = this._transform;
     // Add ymax line
-    let ymaxLine = document.createElementNS(NS_SVG, 'line');
+    ymaxLine = document.createElementNS(NS_SVG, 'line');
     let tymax = transform.transformPoint([0,this.ymax])[1];
-    ymaxLine.setAttribute('id','ymax');
     ymaxLine.setAttribute('x1','0');
     ymaxLine.setAttribute('y1',tymax+'px');
     ymaxLine.setAttribute('x2',this.width+'px');
     ymaxLine.setAttribute('y2',tymax+'px');
     ymaxLine.setAttribute('style','stroke:#888;fill:none;stroke-dasharray:4,5');
-    this._markerDom.push(ymaxLine);
+    ymaxLine.setAttribute('id', 'ymax-line-'+this.guid)
+    this.dom.appendChild(ymaxLine);
 
     // Add ymin line
-    let yminLine = document.createElementNS(NS_SVG, 'line');
+    yminLine = document.createElementNS(NS_SVG, 'line');
     let tymin = transform.transformPoint([0,this.ymin])[1];
-    yminLine.setAttribute('id','ymin');
     yminLine.setAttribute('x1','0');
     yminLine.setAttribute('y1',tymin+'px');
     yminLine.setAttribute('x2',this.width+'px');
     yminLine.setAttribute('y2',tymin+'px');
+    yminLine.setAttribute('id','ymin-line-'+this.guid);
     yminLine.setAttribute('style','stroke:#888;fill:none;stroke-dasharray:4,5');
-    this._markerDom.push(yminLine);
+    this.dom.appendChild(yminLine);
 
     if(this.ymin < 0 && this.ymax > 0) {
       // Add zero marker
       let zeroLine = document.createElementNS(NS_SVG, 'line');
       let tzero = transform.transformPoint([0,0])[1];
-      zeroLine.setAttribute('id','zero');
       zeroLine.setAttribute('x1','0');
       zeroLine.setAttribute('y1',tzero+'px');
       zeroLine.setAttribute('x2',this.width+'px');
       zeroLine.setAttribute('y2',tzero+'px');
+      zeroLine.setAttribute('id','zero-line-'+this.guid);
       zeroLine.setAttribute('style','stroke:#ccc;fill:none;stroke-dasharray:4,5');
-      this._markerDom.push(zeroLine);
+      this.dom.appendChild(zeroLine);
     }
   }
-
 }
 

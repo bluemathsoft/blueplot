@@ -145,15 +145,20 @@ export default class DataGroup2N extends DataGroup {
     }
     polyline.setAttribute('points', coordStrings.join(' '));
     polyline.setAttribute('style', style||DEFAULT_STROKE_STYLE);
-    return polyline;
+
+    let g = document.createElementNS(NS_SVG, 'g');
+    g.setAttribute('class','plot-content');
+    g.appendChild(polyline);
+    return g;
   }
 
   private _genScatterDom(
     xdata:number[], ydata:number[], style?:string, radius?:number) :
-    Array<Element>
+    Element
   {
-    let domArr:Array<Element> = [];
     console.assert(xdata.length === ydata.length);
+    let g = document.createElementNS(NS_SVG, 'g');
+    g.setAttribute('class','plot-content');
     for(let i=0; i<xdata.length; i++) {
       let x = xdata[i];
       let y = ydata[i];
@@ -163,18 +168,19 @@ export default class DataGroup2N extends DataGroup {
       dot.setAttribute('cy',ty+'px');
       dot.setAttribute('r',(radius||2)+'px');
       dot.setAttribute('style',style||DEFAULT_FILL_STYLE);
-      domArr.push(dot);
+      g.appendChild(dot);
     }
-    return domArr;
+    return g;
   }
 
   private _genBarDom(
     xdata:number[], ydata:number[], style?:string, barwidth?:number):
-    Array<Element>
+    Element
   {
-    let domArr:Array<Element> = [];
-    let barWidth = barwidth || 8;
     console.assert(xdata.length === ydata.length);
+    let g = document.createElementNS(NS_SVG, 'g');
+    g.setAttribute('class','plot-content');
+    let barWidth = barwidth || 8;
     for(let i=0; i<xdata.length; i++) {
       let x = xdata[i];
       let y = ydata[i];
@@ -193,15 +199,19 @@ export default class DataGroup2N extends DataGroup {
       bar.setAttribute('width', barWidth+'px');
       bar.setAttribute('height',Math.abs(yval)+'px');
       bar.setAttribute('style', style||DEFAULT_FILL_STYLE);
-      domArr.push(bar);
+      g.appendChild(bar);
     }
-    return domArr;
+    return g;
   }
 
   private _update() {
     this._computeTransform();
 
-    this._plotDom.splice(0); // Flush current plot doms
+    let plotElements = this.dom.querySelectorAll('.plot-content');
+    for(let i=0; i<plotElements.length; i++) {
+      plotElements[i].remove();
+    }
+
     console.assert(this._xSeriesGroup.length === this._ySeriesGroup.length);
     for(let i=0; i<this._xSeriesGroup.length; i++) {
       let xseries = this._xSeriesGroup[i];
@@ -212,16 +222,15 @@ export default class DataGroup2N extends DataGroup {
 
       switch(type) {
         case 'line':
-          this._plotDom.push(this._genLineDom(
-            xseries, yseries, style));
+          this.dom.appendChild(this._genLineDom(xseries, yseries, style));
           break;
         case 'scatter':
-          this._plotDom = this._plotDom.concat(this._genScatterDom(
-            xseries, yseries, style, radius));
+          this.dom.appendChild(
+            this._genScatterDom(xseries, yseries, style, radius));
           break;
         case 'bar':
-          this._plotDom = this._plotDom.concat(this._genBarDom(
-            xseries, yseries, style, barwidth));
+          this.dom.appendChild(
+            this._genBarDom(xseries, yseries, style, barwidth));
           break;
         case 'area':
           break;

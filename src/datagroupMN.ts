@@ -104,9 +104,12 @@ export default class DataGroupMN extends DataGroup {
   private _update() {
     this._computeTransform();
     let {style, radius, type, barwidth} = this._plotType;
-    this._plotDom.splice(0);
 
-    let g = this._genGridDom(this._data);
-    this._plotDom.push(g);
+    let plotContentElems = this.dom.querySelectorAll('.plot-content');
+    for(let i=0; i<plotContentElems.length; i++) {
+      plotContentElems[i].remove();
+    }
+
+    this.dom.appendChild(this._genGridDom(this._data));
   }
 }

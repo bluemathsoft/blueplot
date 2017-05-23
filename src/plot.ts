@@ -60,21 +60,8 @@ export default class Plot {
   }
 
   add(dg : DataGroup) {
-    this.dgarr.push(dg);
+    this.dom.appendChild(dg.dom);
   }
-
-  render() {
-    // Remove all content of the plot
-    while(this.dom.children.length > 0) {
-      this.dom.children[0].remove();
-    }
-    for(let dg of this.dgarr) {
-      for(let dom of dg.domArr) {
-        this.dom.appendChild(dom);
-      }
-    }
-  }
-
 }
 
 export {
