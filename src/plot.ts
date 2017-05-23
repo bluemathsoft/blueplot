@@ -36,6 +36,7 @@ interface PlotType {
   style? : string;
   radius? : number; // For scatter plots
   barwidth? : number; // For bar plots
+  timetrail? : boolean; // For grid plots
 };
 
 

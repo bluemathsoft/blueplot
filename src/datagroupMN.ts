@@ -16,6 +16,8 @@ function isInteger(value:number) {
 export default class DataGroupMN extends DataGroup {
 
   private _data : number[][];
+  private _lastdata : number[][];
+  private _changed : number[][];
   private _plotType : PlotType;
   private _m : number;
   private _c : number;
@@ -25,6 +27,9 @@ export default class DataGroupMN extends DataGroup {
   }
 
   from2DData(data:number[][], plotType:PlotType) {
+    if(this._data) {
+      this._lastdata = JSON.parse(JSON.stringify(this._data));
+    }
     this._data = data;
     this._plotType = plotType;
     this._update();
@@ -41,10 +46,13 @@ export default class DataGroupMN extends DataGroup {
 
     let cellW = this.width/ncols;
     let cellH = this.height/nrows;
-    let cellMargin = 3;
+    let cellMargin = 8;
     let baseColor = new Kolor(1.0,0.2,0.0);
 
+    let cellRects : Array<Array<Element>> = [];
+
     for(let i=0; i<data.length; i++) {
+      cellRects[i] = [];
       for(let j=0; j<data[i].length; j++) {
         let v = data[i][j];
         let sat = this._m * v + this._c;
@@ -55,7 +63,7 @@ export default class DataGroupMN extends DataGroup {
         rect.setAttribute('height',(cellH-cellMargin/2)+'px');
         rect.setAttribute('x',(j*cellW+cellMargin/2)+'px');
         rect.setAttribute('y',(i*cellH+cellMargin/2)+'px');
-        rect.setAttribute('style','fill:'+fillColor.toCSSHex()+';stroke:none');
+        rect.setAttribute('style','fill:'+fillColor.toCSSHex());
 
         let text = document.createElementNS(NS_SVG, 'text');
         text.setAttribute('x',(j*cellW+cellW/2)+'px');
@@ -66,8 +74,18 @@ export default class DataGroupMN extends DataGroup {
           text.textContent = v.toFixed(2);
         }
 
+        cellRects[i].push(rect);
+
         g.appendChild(rect);
         g.appendChild(text);
+      }
+    }
+
+    if(this._changed) {
+      for(let [i,j] of this._changed) {
+        let style = cellRects[i][j].getAttribute('style');
+        style = style+';stroke:#000;stroke-width:2';
+        cellRects[i][j].setAttribute('style',style);
       }
     }
 
@@ -101,9 +119,26 @@ export default class DataGroupMN extends DataGroup {
     this._c = 1-vmax/vspan;
   }
 
+  private _findChangedCellsInLastChange() {
+    if(!this._lastdata) {
+      return;
+    }
+    this._changed = [];
+    for(let i=0; i<this._data.length; i++) {
+      for(let j=0; j<this._data[i].length; j++) {
+        if(this._lastdata[i][j] !== this._data[i][j]) {
+          this._changed.push([i,j]);
+        }
+      }
+    }
+  }
+
   private _update() {
     this._computeTransform();
-    let {style, radius, type, barwidth} = this._plotType;
+    let {style, radius, type, barwidth, timetrail} = this._plotType;
+    if(timetrail) {
+      this._findChangedCellsInLastChange();
+    }
 
     let plotContentElems = this.dom.querySelectorAll('.plot-content');
     for(let i=0; i<plotContentElems.length; i++) {
