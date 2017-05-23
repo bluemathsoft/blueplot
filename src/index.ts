@@ -27,4 +27,7 @@ import DataGroup2N from './datagroup2N'
 import DataGroupMN from './datagroupMN'
 import Kolor from './kolor'
 
-export {Plot, MathText, DataGroup, DataGroupN, DataGroup2N, Kolor}
+export {
+  Plot, MathText, DataGroup, DataGroupN, DataGroup2N,
+  DataGroupMN, Kolor
+}
